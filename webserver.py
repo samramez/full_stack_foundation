@@ -1,7 +1,7 @@
 __author__ = 'samramez'
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-
+import cgi
 
 class webserverHandler(BaseHTTPRequestHandler):
 
@@ -19,7 +19,10 @@ class webserverHandler(BaseHTTPRequestHandler):
 
                 # What we're sending back to client
                 output = ""
-                output += "<html><body><h1>Hello!</h1></body></html>"
+                output += "<html><body>"
+                output += "<h1>Hello!</h1>"
+                output += '''<form method='POST' enctype='multipart/form-data' action='/hello'><h2>What would you like me to say?</h2><input name="message" type="text" ><input type="submit" value="Submit"> </form>'''
+                output += "</body></html>"
                 self.wfile.write(output)
                 print output
 
@@ -30,14 +33,44 @@ class webserverHandler(BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
-                message = ""
-                message += "<html><body> &#161 Hola ! </body></html>"
-                self.wfile.write(message)
-                print message
+                output = ""
+                output += "<html><body>"
+                output += "<h1>&#161 Hola !</h1>"
+                output += '''<form method='POST' enctype='multipart/form-data' action='/hello'><h2>What would you like me to say?</h2><input name="message" type="text" ><input type="submit" value="Submit"> </form>'''
+                output += "</body></html>"
+                self.wfile.write(output)
+                print output
                 return
 
         except IOError:
             self.send_error(404, "File Not Found %s" % self.path)
+
+    def do_POST(self):
+        try:
+            self.send_response(301)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
+
+            # Checking if the data we're receiving is HTML FORM type
+            if ctype == 'multipart/form-data':
+
+                # Collect all of the fields in the form
+                fields = cgi.parse_multipart(self.rfile, pdict)
+
+                # Get value from the specific field ('message') from the FORM
+                messagecontent = fields.get('message')
+
+            output = ""
+            output +=  "<html><body>"
+            output += " <h2> Okay, how about this: </h2>"
+            output += "<h1> %s </h1>" % messagecontent[0]
+            output += '''<form method='POST' enctype='multipart/form-data' action='/hello'><h2>What would you like me to say?</h2><input name="message" type="text" ><input type="submit" value="Submit"> </form>'''
+            output += "</body></html>"
+            self.wfile.write(output)
+            print output
+        except:
+            pass
 
 
 # Instantiate the server
