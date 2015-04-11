@@ -13,14 +13,12 @@ class Restaurant(Base):
     __tablename__ = 'restaurant'
 
     # Mapper:
-
     # nullable = False is telling if there is no value for this, don't make the table.
     id = Column(Integer, primary_key = True)
     name = Column(String(250), nullable = False)
 
 class MenuItem(Base):
     __tablename__ = 'menu_item'
-
 
     # Mapper:
     name = Column(String(80), nullable = False)
